@@ -1,7 +1,7 @@
 import logging
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
 from scapy.all import *
-dst_ip = "172.16.111.3"   # Victim-Kali
+dst_ip = "172.16.111.2"   # Victim-Kali
 src_port = RandShort() 
 dst_port = 80
 

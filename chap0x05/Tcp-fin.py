@@ -1,16 +1,21 @@
+import logging
+logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
 from scapy.all import *
 
+dst_ip = "172.16.111.2"
+src_port = RandShort()
+dst_port = 80
 
-def finscan(dst_ip, dst_port, timeout=10):
-    pkts = sr1(IP(dst=dst_ip)/TCP(dport=dst_port, flags="F"), timeout=10)
-    if (pkts is None):
-        print("Open|Filtered")
-    elif(pkts.haslayer(TCP)):
-        if(pkts.getlayer(TCP).flags == 0x14):
-            print("Closed")
-    elif(pkts.haslayer(ICMP)):
-        if(int(pkts.getlayer(ICMP).type) == 3 and int(pkts.getlayer(ICMP).code) in [1, 2, 3, 9, 10, 13]):
-            print("Filtered")
+print('TCP fin scan:')
+print('-----------------------------------------')
+fin_scan_resp = sr1(IP(dst=dst_ip)/TCP(sport=src_port,dport=dst_port,flags="F"),timeout=10)
+print('-----------------------------------------')
 
-
-finscan('172.16.111.2', 80)
+if (str(type(fin_scan_resp))=="<class 'NoneType'>"):
+    print('State of port '+ str(dst_port) +' on '+ str(dst_ip) +": Filtered or Open")
+elif(fin_scan_resp.haslayer(TCP)):
+    if(fin_scan_resp.getlayer(TCP).flags == 0x14):
+        print('State of port '+ str(dst_port) +' on '+ str(dst_ip) +": Closed ")
+elif(fin_scan_resp.haslayer(ICMP)):
+    if(int(fin_scan_resp.getlayer(ICMP).type)==3 and int(fin_scan_resp.getlayer(ICMP).code) in [1,2,3,9,10,13]):
+        print('State of port '+ str(dst_port) +' on '+ str(dst_ip) +": Filtered")
